@@ -1,0 +1,21 @@
+[
+  {
+    "model": "auth.group",
+    "pk": 1,
+    "fields": {
+      "name": "Admin",
+      "permissions": []
+    }
+  },
+  {
+    "model":"users.user",
+    "pk":1,
+    "fields":{
+      "username": "admin",
+      "email": "admin@example.com",
+      "is_active": true,
+      "is_staff": true,
+      "is_superuser": true
+    }
+  }
+]

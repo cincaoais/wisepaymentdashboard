@@ -1,0 +1,12 @@
+#macOS template
+.DS_Store
+
+#Environment files
+.env
+.venv
+venv/
+*.env
+
+#cache files
+__pycache__/
+db.sqlite3
