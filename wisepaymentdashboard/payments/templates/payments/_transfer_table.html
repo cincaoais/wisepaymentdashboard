@@ -1,0 +1,25 @@
+<div class="card">
+  <table class="table table-hover mb-0 align-middle">
+    <thead>
+      <tr>
+        <th>Reference</th><th>Created</th><th class="text-end">Send</th><th class="text-end">Receive</th>
+        <th>Recipient</th><th>Status</th><th>Last synced</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for transfer in transfers %}
+        <tr>
+          <td><a href="{% url 'payments:transfer_detail' transfer.pk %}">{{ transfer.reference_code }}</a></td>
+          <td>{{ transfer.created_at|date:"j M H:i" }}</td>
+          <td class="text-end">{{ transfer.source_amount|floatformat:2 }} {{ transfer.source_currency }}</td>
+          <td class="text-end">{{ transfer.target_amount|floatformat:2 }} {{ transfer.target_currency }}</td>
+          <td>{{ transfer.recipient_name }}</td>
+          <td>{% include "payments/_status_badge.html" with info=transfer.status_info status=transfer.status %}</td>
+          <td class="small text-secondary">{{ transfer.last_synced_at|date:"j M H:i:s"|default:"—" }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="7" class="text-secondary">No transfers yet. <a href="{% url 'payments:send_amount' %}">Send money</a>.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

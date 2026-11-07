@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Log in · Payment Console{% endblock %}
+
+{% block content %}
+<div class="card mx-auto mt-5" style="max-width: 24rem;">
+  <div class="card-body">
+    <h1 class="h4 mb-3">Log in</h1>
+    {% if form.errors %}
+      <div class="alert alert-danger">Your username and password didn't match. Please try again.</div>
+    {% endif %}
+    <form method="post" action="{% url 'login' %}">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label" for="id_username">Username</label>
+        <input class="form-control" type="text" name="username" id="id_username" autofocus required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="id_password">Password</label>
+        <input class="form-control" type="password" name="password" id="id_password" required>
+      </div>
+      <input type="hidden" name="next" value="{{ next }}">
+      <button class="btn btn-primary w-100">Log in</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

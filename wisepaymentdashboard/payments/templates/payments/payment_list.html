@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Payments (Stripe)</h1>
+  <a class="btn btn-primary" href="{% url 'payments:receive_money' %}">Receive money</a>
+</div>
+{% include "payments/_payment_table.html" %}
+{% endblock %}

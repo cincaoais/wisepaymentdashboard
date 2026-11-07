@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="h3 mb-3">Send money</h1>
+{% include "payments/_wizard_steps.html" %}
+
+<div class="card" style="max-width: 32rem;">
+  <div class="card-body">
+    {% if quote %}
+      <dl class="row mb-3">
+        <dt class="col-6">You send</dt><dd class="col-6 text-end">{{ quote.source_amount|floatformat:2 }} {{ quote.source_currency }}</dd>
+        <dt class="col-6">Fee</dt><dd class="col-6 text-end">{{ quote.fee|floatformat:2 }} {{ quote.source_currency }}</dd>
+        <dt class="col-6">Rate</dt><dd class="col-6 text-end">1 {{ quote.source_currency }} = {{ quote.rate }} {{ quote.target_currency }}</dd>
+        <dt class="col-6">Recipient gets</dt><dd class="col-6 text-end fw-semibold">{{ quote.target_amount|floatformat:2 }} {{ quote.target_currency }}</dd>
+        <dt class="col-6">To</dt><dd class="col-6 text-end">{{ recipient.name }}<br><span class="small text-secondary">{{ recipient.account }}</span></dd>
+        <dt class="col-6">Reference</dt><dd class="col-6 text-end">{{ reference }}</dd>
+        <dt class="col-6">Create before</dt><dd class="col-6 text-end">{{ quote.expires_at|time:"H:i" }} ({{ quote.expires_at|timeuntil }} left)</dd>
+      </dl>
+      {% if quote.balance_disabled_reason %}
+        <div class="alert alert-warning">
+          Wise will not let you pay this from your balance: “{{ quote.balance_disabled_reason }}”
+          You can still create the transfer and fund it in the <a href="{{ wise_website_url }}" target="_blank" rel="noopener">Wise website</a>.
+        </div>
+      {% endif %}
+      {% if quote.is_expired %}
+        <div class="alert alert-warning">This quote has expired. Start again to get a fresh price.</div>
+      {% endif %}
+    {% endif %}
+    <form method="post" class="d-flex justify-content-between" onsubmit="this.querySelector('button').disabled = true;">
+      {% csrf_token %}
+      <a class="btn btn-outline-secondary" href="{% url 'payments:send_recipient' %}">◂ Back</a>
+      <button class="btn btn-primary" {% if not quote or quote.is_expired %}disabled{% endif %}>Create transfer ▸</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

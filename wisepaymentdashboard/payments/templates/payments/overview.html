@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="h3 mb-4">Overview</h1>
+
+<h2 class="h4 mb-3">Wise · send money</h2>
+<div class="card mb-4 {% if connection_error %}border-danger{% else %}border-success{% endif %}">
+  <div class="card-body">
+    <h3 class="h6 text-uppercase text-secondary">Connection</h3>
+    {% if connection_error %}
+      <p class="mb-1 text-danger fw-semibold">● Not connected</p>
+      <p class="mb-1">{{ connection_error }}</p>
+      <p class="mb-0 small text-secondary">API: {{ wise_api_url }} · see the <a href="{% url 'payments:api_log' %}">API log</a> for details.</p>
+    {% else %}
+      <p class="mb-1 text-success fw-semibold">● Connected <span class="text-secondary fw-normal">{{ wise_api_url }}</span></p>
+      <p class="mb-1">Profile in use: <strong>{{ profile_name }}</strong> ({{ profile.type }}, {{ profile.address.countryIso2Code }}) #{{ profile.id }}</p>
+      {% if profiles|length > 1 %}
+        <p class="mb-1 small text-secondary">
+          All profiles on this token:
+          {% for item in profiles %}#{{ item.id }} {{ item.type }} {{ item.address.countryIso2Code }}{% if not forloop.last %} · {% endif %}{% endfor %}.
+          Set <code>WISE_PROFILE_ID</code> in .env to choose one.
+        </p>
+      {% endif %}
+      <p class="mb-0 small text-secondary">Checked {% now "j M Y, H:i" %}</p>
+    {% endif %}
+  </div>
+</div>
+
+{% if not connection_error %}
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <h3 class="h5 mb-0">Balances</h3>
+  {% if not has_source_balance %}
+    <form method="post" action="{% url 'payments:create_balance' %}">
+      {% csrf_token %}
+      <button class="btn btn-sm btn-outline-primary">Open a GBP balance</button>
+    </form>
+  {% endif %}
+</div>
+<div class="row g-3 mb-4">
+  {% for balance in balances %}
+    <div class="col-sm-6 col-lg-3">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="text-secondary small">{{ balance.currency }} · #{{ balance.id }}</div>
+          <div class="fs-4 fw-semibold">{{ balance.amount.value|floatformat:2 }}</div>
+          {% if wise_is_sandbox %}
+            <form method="post" action="{% url 'payments:top_up' %}" class="input-group input-group-sm mt-2">
+              {% csrf_token %}
+              <input type="hidden" name="balance_id" value="{{ balance.id }}">
+              <input type="hidden" name="currency" value="{{ balance.currency }}">
+              <input class="form-control" type="number" name="amount" value="1000" min="1" step="0.01" aria-label="Top-up amount">
+              <button class="btn btn-outline-secondary">Top up</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <div class="col"><p class="text-secondary">No balances yet.</p></div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<h3 class="h5">Transfers</h3>
+<p class="text-secondary">
+  {% for group, count in counts.items %}
+    <a href="{% url 'payments:transfer_list' %}?group={{ group }}">{{ group }} {{ count }}</a>{% if not forloop.last %} · {% endif %}
+  {% endfor %}
+</p>
+{% include "payments/_transfer_table.html" with transfers=recent_transfers %}
+
+<h2 class="h4 mt-5 mb-3">Stripe · receive money</h2>
+<div class="card mb-4 {% if stripe_error %}border-danger{% else %}border-success{% endif %}">
+  <div class="card-body">
+    <h3 class="h6 text-uppercase text-secondary">Connection</h3>
+    {% if stripe_error %}
+      <p class="mb-1 text-danger fw-semibold">● Not connected</p>
+      <p class="mb-0">{{ stripe_error }}</p>
+    {% else %}
+      <p class="mb-1 text-success fw-semibold">● Connected <span class="text-secondary fw-normal">api.stripe.com (sandbox)</span></p>
+      <p class="mb-0">
+        Balance:
+        {% for kind, amount, currency in stripe_balance %}
+          {{ amount|floatformat:2 }} {{ currency }} {{ kind }}{% if not forloop.last %} · {% endif %}
+        {% empty %}
+          nothing yet
+        {% endfor %}
+      </p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <h3 class="h5 mb-0">Payments</h3>
+  <a class="btn btn-sm btn-outline-primary" href="{% url 'payments:receive_money' %}">Receive money</a>
+</div>
+{% include "payments/_payment_table.html" with payments=recent_payments %}
+{% endblock %}

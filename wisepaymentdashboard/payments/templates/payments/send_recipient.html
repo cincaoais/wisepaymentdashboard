@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="h3 mb-3">Send money</h1>
+{% include "payments/_wizard_steps.html" %}
+
+<div class="card mb-3" style="max-width: 40rem;">
+  <div class="card-body">
+    <p class="text-secondary">Pick an EUR recipient you already have, or add a new one with their IBAN.</p>
+    <form method="post">
+      {% csrf_token %}
+      {% include "payments/_form_fields.html" %}
+      <div class="d-flex justify-content-between">
+        <a class="btn btn-outline-secondary" href="{% url 'payments:send_amount' %}">◂ Start again</a>
+        <button class="btn btn-primary">Continue ▸</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% if requirements %}
+<details class="card" style="max-width: 40rem;">
+  <summary class="card-header">What Wise asks for (raw <code>account-requirements</code> response)</summary>
+  <div class="card-body">
+    <p class="small text-secondary">Wise builds recipient forms from this list. Each currency and country needs different fields, which is why real apps generate the form from it.</p>
+    <pre class="small mb-0" style="max-height: 24rem;">{{ requirements }}</pre>
+  </div>
+</details>
+{% endif %}
+{% endblock %}

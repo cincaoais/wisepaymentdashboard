@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="h3 mb-3">Receive money</h1>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-body">
+        <p class="text-secondary">You'll go to Stripe's own payment page (Stripe Checkout). After paying, Stripe sends you back here.</p>
+        <form method="post" onsubmit="this.querySelector('button').disabled = true;">
+          {% csrf_token %}
+          {% include "payments/_form_fields.html" %}
+          <button class="btn btn-primary">Go to Stripe payment page ▸</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    {% include "payments/_stripe_test_cards.html" %}
+  </div>
+</div>
+{% endblock %}

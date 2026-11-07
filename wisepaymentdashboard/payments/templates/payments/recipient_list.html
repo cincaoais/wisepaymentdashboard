@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Recipients ({{ currency }})</h1>
+  <a class="btn btn-primary" href="{% url 'payments:send_amount' %}">Send money</a>
+</div>
+<p class="text-secondary">Loaded live from Wise every time, as Wise recommends. New recipients are added in the send-money flow.</p>
+
+<div class="card">
+  <table class="table mb-0">
+    <thead><tr><th>Wise ID</th><th>Name</th><th>Account</th></tr></thead>
+    <tbody>
+      {% for recipient in recipients %}
+        <tr><td>{{ recipient.id }}</td><td>{{ recipient.name }}</td><td>{{ recipient.account }}</td></tr>
+      {% empty %}
+        <tr><td colspan="3" class="text-secondary">No {{ currency }} recipients yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

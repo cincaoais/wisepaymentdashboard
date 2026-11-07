@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="h3 mb-3">API log</h1>
+<p class="text-secondary">
+  Every call this dashboard made to Wise and Stripe (latest 200). No token, key or bank details are stored.
+  The trace ID is what support asks for: Wise's <code>x-trace-id</code>, Stripe's <code>Request-Id</code>.
+</p>
+
+<ul class="nav nav-pills mb-3">
+  <li class="nav-item"><a class="nav-link {% if not provider %}active{% endif %}" href="{% url 'payments:api_log' %}">All</a></li>
+  {% for item in providers %}
+    <li class="nav-item"><a class="nav-link {% if provider == item %}active{% endif %}" href="?provider={{ item }}">{{ item }}</a></li>
+  {% endfor %}
+</ul>
+
+<div class="card">
+  <table class="table table-sm mb-0 align-middle small">
+    <thead>
+      <tr><th>Time</th><th>Provider</th><th>Method</th><th>Path</th><th>Status</th><th class="text-end">ms</th><th>For</th><th>Error</th><th>Trace ID</th></tr>
+    </thead>
+    <tbody>
+      {% for call in calls %}
+        <tr>
+          <td class="text-nowrap">{{ call.created_at|date:"j M H:i:s" }}</td>
+          <td>{{ call.provider }}</td>
+          <td>{{ call.method }}</td>
+          <td><code>{{ call.path }}</code></td>
+          <td>
+            {% if call.status_code %}
+              <span class="badge {% if call.status_code < 400 %}text-bg-success{% else %}text-bg-danger{% endif %}">{{ call.status_code }}</span>
+            {% else %}
+              <span class="badge text-bg-dark">no answer</span>
+            {% endif %}
+          </td>
+          <td class="text-end">{{ call.duration_ms }}</td>
+          <td>
+            {% if call.transfer %}
+              <a href="{% url 'payments:transfer_detail' call.transfer.pk %}">{{ call.transfer.reference_code }}</a>
+            {% elif call.payment %}
+              <a href="{% url 'payments:payment_detail' call.payment.pk %}">{{ call.payment.reference_code }}</a>
+            {% else %}—{% endif %}
+          </td>
+          <td class="text-danger">{{ call.error }}</td>
+          <td class="font-monospace text-secondary">{{ call.trace_id }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="9" class="text-secondary">No calls yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

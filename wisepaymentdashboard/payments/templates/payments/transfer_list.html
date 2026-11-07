@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="h3 mb-3">Transfers</h1>
+
+<ul class="nav nav-pills mb-3">
+  <li class="nav-item"><a class="nav-link {% if not group %}active{% endif %}" href="{% url 'payments:transfer_list' %}">All</a></li>
+  {% for item in groups %}
+    <li class="nav-item"><a class="nav-link {% if group == item %}active{% endif %}" href="?group={{ item }}">{{ item }}</a></li>
+  {% endfor %}
+</ul>
+
+{% include "payments/_transfer_table.html" %}
+{% endblock %}
